@@ -13,8 +13,8 @@ const TensorCamera = cameraWithTensors(Camera);
 
 const styles = StyleSheet.create({
   camera: {
-    height: 320,
-    width: 240,
+    height: 224,
+    width: 224,
   },
 });
 
@@ -52,7 +52,12 @@ class TFCamera extends React.Component {
       const loop = async () => {
           const nextImageTensor = images.next().value;
           // const predictions = await this.state.model.estimateHands(nextImageTensor);
-          const predictions = await this.state.model.predict(nextImageTensor);
+          const resized = tf.nextImageTensor.resizeBilinear(image, [7, 7])
+          console.log(resized.pad([[0, 0], [0, 0], [126, 127]]).shape);// [7,7,256]
+
+          // reshape the tensor to be a 4d
+          resized.reshape([1,7,7,256])
+          const predictions = await this.state.model.predict(resized);
           this.setState({predictions})
           requestAnimationFrame(loop);
       };
@@ -84,8 +89,8 @@ class TFCamera extends React.Component {
             // Tensor related props
             cameraTextureHeight={textureDims.height}
             cameraTextureWidth={textureDims.width}
-            resizeHeight={320}
-            resizeWidth={240}
+            resizeHeight={224}
+            resizeWidth={224}
             resizeDepth={3}
             onReady={this.makeHandleCameraStream()}
             autorender={true}
