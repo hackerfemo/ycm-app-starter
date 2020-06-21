@@ -3,6 +3,7 @@ import { StyleSheet, Text, View } from "react-native";
 import { Camera } from "expo-camera";
 import { cameraWithTensors, bundleResourceIO } from "@tensorflow/tfjs-react-native";
 import * as tf from "@tensorflow/tfjs";
+import { image } from "@tensorflow/tfjs";
 // import * as handpose from '@tensorflow-models/handpose';
 // import * as mobilenet from "@tensorflow-models/mobilenet";
 
@@ -51,12 +52,14 @@ class TFCamera extends React.Component {
     return (images, updatePreview, gl) => {
       const loop = async () => {
           const nextImageTensor = images.next().value;
+  
           // const predictions = await this.state.model.estimateHands(nextImageTensor);
-          const resized = tf.nextImageTensor.resizeBilinear(image, [7, 7])
+          var resized = tf.image.resizeBilinear(nextImageTensor, [7, 7])
           console.log(resized.pad([[0, 0], [0, 0], [126, 127]]).shape);// [7,7,256]
 
           // reshape the tensor to be a 4d
-          resized.reshape([1,7,7,256])
+          resized = resized.reshape([1,7,7,256])
+
           const predictions = await this.state.model.predict(resized);
           this.setState({predictions})
           requestAnimationFrame(loop);
